@@ -2,22 +2,30 @@
 
 A watchlist for flight and event ticket prices. Add a flight or an event with a target price per ticket, and a scheduled check looks up current prices and alerts you when one drops to your target.
 
-## What's here
+## How it runs
 
-`index.html` is the app itself: a Claude artifact page. It stores its watchlist in the artifact's own database (no separate backend), and reads/writes it live so the page always reflects the latest checked prices.
+The price check runs on **GitHub Actions**, free for this public repo, and uses no Claude usage.
 
-The recurring price check runs as a Claude scheduled task (routine), not as code in this repo. Every hour it reads the watchlist, checks StubHub, Ticketmaster, SeatGeek, Vivid Seats, TickPick, Gametime and AXS (and flight sites for flights) for the current lowest price per watch, and writes the results back.
+- `watches.json` is the watchlist. Each watch has a name, event date, `target` price per ticket, `active` flag, and one event page URL per seller. Edit it on GitHub to add, pause or change watches.
+- `check.py` fetches each seller page and reads the lowest listed price. It checks the page's structured data first, then prices embedded in the page's app data. With a `SEATGEEK_CLIENT_ID` secret and a watch's `seatgeek_event_id`, it also asks the SeatGeek API.
+- `.github/workflows/check-prices.yml` runs the check every 5 minutes. GitHub often starts scheduled runs late, so expect roughly every 5 to 15 minutes. Each run's summary page shows the price from every site, or why a site gave none.
+- `state.json` remembers the last price that triggered an alert, so a watch alerts once per new low. When the price goes back up to the target or higher, the watch resets and alerts again on the next drop.
 
 ## Phone alerts
 
-When a price drops strictly under a watch's target, the check posts an alert to an [ntfy](https://ntfy.sh) topic; subscribe to that topic in the ntfy app to get it as a phone notification. A watch alerts once per new low, not every hour. If ntfy can't be reached, the check falls back to a Claude app push notification. The cloud environment running the check must allow `ntfy.sh` in its network settings.
+When the lowest price is strictly under a watch's target, the check posts to an [ntfy](https://ntfy.sh) topic. Subscribe to the topic in the ntfy app to get it as a phone notification.
 
-## Using it
+Setup:
+1. In the repo, go to Settings > Secrets and variables > Actions and add a secret named `NTFY_TOPIC` with your topic name.
+2. Go to Actions > Check ticket prices > Run workflow, tick "Also send a test notification", and run it.
 
-Publish `index.html` as a Claude artifact with the `db` capability enabled. From there:
+## Limits
 
-- Add a flight (origin, destination, dates, cabin, travelers) or an event (name, city, date, quantity, section) with a target price.
-- The page shows the latest checked price, how it compares to your target, and a trend line across checks.
-- Pause, resume, change the target, or delete a watch at any time.
+- Many ticket sites block automated requests, especially StubHub and Ticketmaster. A blocked site shows as `blocked (HTTP 403)` in the run summary, and the check uses whichever sites answered.
+- Use the single event page URL for each seller. A page that lists several events is skipped, so a different date's price can't cause a false alert.
+- GitHub turns off scheduled workflows in a public repo after 60 days without commits. Re-enable it from the Actions tab.
+- Prices can change within minutes. Confirm on the seller's site before you buy.
 
-Prices come from public listings at check time and can shift within minutes; confirm on the seller's site before buying.
+## The Claude artifact version
+
+`index.html` is the earlier version of this tracker, built as a Claude artifact whose price checks ran as a Claude scheduled task. That scheduled task is now turned off, and the artifact's watchlist is separate from `watches.json`.

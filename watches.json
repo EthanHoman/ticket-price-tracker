@@ -1,0 +1,19 @@
+[
+  {
+    "id": "acl-2026-w1-3day",
+    "name": "ACL Weekend One 3-Day GA",
+    "date": "2026-10-02",
+    "target": 350,
+    "active": true,
+    "urls": {
+      "TickPick": "https://www.tickpick.com/buy-austin-city-limits-music-festival-weekend-one-twenty-one-pilots-rufus-du-sol-charli-xcx-lorde-3-day-pass-tickets-zilker-park-10-2-26-3am/7617998/",
+      "Vivid Seats": "https://www.vividseats.com/austin-city-limits-festival-tickets-austin-zilker-park-10-2-2026--concerts-music-festivals/production/6173217",
+      "Gametime": "https://gametime.co/concert/2026-austin-city-limits-festival-weekend-one-3-day-pass-10-2-10-4-tickets/10-2-2026-austin-tx-zilker-park/events/68f95e10003985ae44495e38",
+      "AXS": "https://www.axs.com/events/1261707/2026-austin-city-limits-festival-weekend-one-3-day-pass-102-104-charli-tickets",
+      "StubHub": "",
+      "Ticketmaster": "",
+      "SeatGeek": ""
+    },
+    "seatgeek_event_id": null
+  }
+]
