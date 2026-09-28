@@ -90,11 +90,11 @@ input:focus-visible,select:focus-visible,button:focus-visible{outline:2px solid 
   <header>
     <div>
       <h1>Ticket <span>Watch</span></h1>
-      <p class="sub">Set a target price for a flight or an event. Claude checks the major sellers every 6 hours and pushes an alert to your phone when a price lands at or under your number.</p>
+      <p class="sub">Set a target price for a flight or an event. Claude checks the major sellers every hour and sends an alert to your phone when a price drops under your number.</p>
     </div>
     <div class="board" aria-label="Summary">
       <div><b id="sumWatching">0</b><small>Watching</small></div>
-      <div><b id="sumHits">0</b><small>At target</small></div>
+      <div><b id="sumHits">0</b><small>Under target</small></div>
       <div><b id="sumChecked">never</b><small>Last check</small></div>
     </div>
   </header>
@@ -136,7 +136,7 @@ input:focus-visible,select:focus-visible,button:focus-visible{outline:2px solid 
           <label>Tickets<input id="eQty" type="number" min="1" max="10" value="2"></label>
           <label>Section<input id="eSection" placeholder="Any" autocomplete="off"></label>
         </div>
-        <p class="hint">Checks Ticketmaster, StubHub, SeatGeek, Vivid Seats and TickPick.</p>
+        <p class="hint">Checks StubHub, Ticketmaster, SeatGeek, Vivid Seats, TickPick, Gametime and AXS.</p>
       </div>
 
       <label>Target price per ticket (USD)<input id="target" type="number" min="1" step="1" placeholder="180" inputmode="numeric"></label>
@@ -176,11 +176,11 @@ input:focus-visible,select:focus-visible,button:focus-visible{outline:2px solid 
 
   function statusOf(w){
     if(w.active===false) return "paused";
-    if(w.latest && w.latest.price!=null && w.latest.price<=w.targetPrice) return "hit";
+    if(w.latest && w.latest.price!=null && w.latest.price<w.targetPrice) return "hit";
     if(!w.latest) return "pending";
     return "watching";
   }
-  var statusLabel={watching:"Watching",hit:"At target",paused:"Paused",pending:"First check pending"};
+  var statusLabel={watching:"Watching",hit:"Under target",paused:"Paused",pending:"First check pending"};
 
   function spark(w){
     var h=(w.history||[]).filter(function(p){return p&&p.price!=null});
@@ -241,7 +241,7 @@ input:focus-visible,select:focus-visible,button:focus-visible{outline:2px solid 
         '<div class="nums">'+
           '<div class="num"><small>Target</small><b>'+money(w.targetPrice)+'</b></div>'+
           '<div class="num"><small>Now</small><b class="'+(st==="hit"?"good":"")+'">'+money(L.price)+'</b></div>'+
-          '<div class="num"><small>'+(gap==null?"Low seen":(gap<=0?"Under by":"Over by"))+'</small><b class="'+(gap!=null&&gap<=0?"good":"")+'">'+(gap==null?money(low):money(Math.abs(gap)))+'</b></div>'+
+          '<div class="num"><small>'+(gap==null?"Low seen":(gap<0?"Under by":"Over by"))+'</small><b class="'+(gap!=null&&gap<0?"good":"")+'">'+(gap==null?money(low):money(Math.abs(gap)))+'</b></div>'+
           '<div class="spark">'+spark(w)+'</div>'+
         '</div>'+
         (L.note?'<p class="note">'+esc(L.note)+'</p>':'')+
