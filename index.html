@@ -1,0 +1,317 @@
+<title>Ticket Watch</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@500;600;700&family=IBM+Plex+Sans:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500&display=swap">
+<style>
+:root{
+  --bg:#F3F4F7; --surface:#FFFFFF; --ink:#18202E; --muted:#5A6476; --line:#DCE0E8;
+  --accent:#B4530A; --accent-ink:#FFFFFF; --accent-soft:#FBEBD9;
+  --good:#1F7A4D; --good-soft:#DDF1E6; --warn:#8A5A00; --idle:#6B7280; --idle-soft:#ECEEF2;
+  --danger:#B42318;
+  --display:"Barlow Condensed","Arial Narrow",system-ui,sans-serif;
+  --body:"IBM Plex Sans",system-ui,-apple-system,"Segoe UI",sans-serif;
+  --mono:"IBM Plex Mono",ui-monospace,SFMono-Regular,Menlo,monospace;
+}
+@media (prefers-color-scheme:dark){
+  :root:not([data-theme="light"]){
+    color-scheme:dark;
+    --bg:#10141C; --surface:#171D28; --ink:#E7EAF0; --muted:#98A2B3; --line:#2A3242;
+    --accent:#F0A04B; --accent-ink:#1A1206; --accent-soft:#3A2A16;
+    --good:#5FD39A; --good-soft:#15352A; --warn:#E8B64C; --idle:#98A2B3; --idle-soft:#222A38;
+    --danger:#F97066;
+  }
+}
+:root[data-theme="dark"]{
+  color-scheme:dark;
+  --bg:#10141C; --surface:#171D28; --ink:#E7EAF0; --muted:#98A2B3; --line:#2A3242;
+  --accent:#F0A04B; --accent-ink:#1A1206; --accent-soft:#3A2A16;
+  --good:#5FD39A; --good-soft:#15352A; --warn:#E8B64C; --idle:#98A2B3; --idle-soft:#222A38;
+  --danger:#F97066;
+}
+*{box-sizing:border-box}
+body{background:var(--bg);color:var(--ink);font:15px/1.5 var(--body);padding-inline:16px;padding-block:20px 48px}
+.wrap{max-width:980px;margin:0 auto;display:grid;gap:22px}
+header{display:flex;flex-wrap:wrap;align-items:flex-end;justify-content:space-between;gap:12px 24px;border-bottom:2px solid var(--ink);padding-bottom:12px}
+h1{font:700 44px/1 var(--display);letter-spacing:.01em;margin:0;text-transform:uppercase}
+h1 span{color:var(--accent)}
+.sub{color:var(--muted);margin:6px 0 0;max-width:60ch}
+.board{display:flex;gap:18px;font-family:var(--mono);font-variant-numeric:tabular-nums}
+.board div{display:grid;gap:0}
+.board b{font:600 26px/1.1 var(--display)}
+.board small{font-size:11px;letter-spacing:.08em;text-transform:uppercase;color:var(--muted)}
+.banner{background:var(--accent-soft);color:var(--ink);border-radius:6px;padding:10px 14px;font-size:14px}
+.layout{display:grid;grid-template-columns:minmax(0,320px) minmax(0,1fr);gap:22px;align-items:start}
+@media (max-width:760px){.layout{grid-template-columns:minmax(0,1fr)}}
+.panel{background:var(--surface);border:1px solid var(--line);border-radius:8px;padding:16px;display:grid;gap:12px}
+.panel h2{font:600 20px/1.1 var(--display);text-transform:uppercase;letter-spacing:.04em;margin:0}
+.seg{display:grid;grid-template-columns:1fr 1fr;border:1px solid var(--line);border-radius:6px;overflow:hidden}
+.seg button{border:0;background:transparent;color:var(--muted);font:600 14px var(--body);padding:8px;cursor:pointer}
+.seg button[aria-pressed="true"]{background:var(--ink);color:var(--bg)}
+label{display:grid;gap:4px;font-size:12px;font-weight:600;letter-spacing:.06em;text-transform:uppercase;color:var(--muted)}
+input,select{font:400 15px var(--body);color:var(--ink);background:var(--bg);border:1px solid var(--line);border-radius:5px;padding:8px 10px;width:100%;min-width:0;text-transform:none;letter-spacing:0}
+input:focus-visible,select:focus-visible,button:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+.row2{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.check{display:flex;align-items:center;gap:8px;text-transform:none;letter-spacing:0;font-weight:500;font-size:14px;color:var(--ink)}
+.check input{width:auto}
+.btn{border:1px solid var(--line);background:var(--surface);color:var(--ink);font:600 13px var(--body);border-radius:5px;padding:7px 11px;cursor:pointer}
+.btn.primary{background:var(--accent);border-color:var(--accent);color:var(--accent-ink);font-size:15px;padding:10px}
+.btn.danger{color:var(--danger)}
+.btn:disabled{opacity:.5;cursor:not-allowed}
+.hint{font-size:13px;color:var(--muted);margin:0}
+.formmsg{font-size:13px;color:var(--danger);margin:0}
+.list{display:grid;gap:12px}
+.card{background:var(--surface);border:1px solid var(--line);border-radius:8px;padding:14px 16px;display:grid;gap:10px}
+.card.hit{border-color:var(--good);box-shadow:inset 4px 0 0 var(--good)}
+.top{display:flex;justify-content:space-between;gap:12px;align-items:flex-start;flex-wrap:wrap}
+.kind{font:500 11px var(--mono);letter-spacing:.1em;text-transform:uppercase;color:var(--muted)}
+.title{font:600 24px/1.1 var(--display);margin:2px 0 0;letter-spacing:.01em}
+.meta{font-size:13px;color:var(--muted);margin:2px 0 0}
+.chip{font:600 11px var(--mono);letter-spacing:.08em;text-transform:uppercase;padding:4px 8px;border-radius:999px;white-space:nowrap}
+.chip.watching{background:var(--accent-soft);color:var(--accent)}
+.chip.hit{background:var(--good-soft);color:var(--good)}
+.chip.paused,.chip.pending{background:var(--idle-soft);color:var(--idle)}
+.nums{display:grid;grid-template-columns:repeat(3,minmax(0,1fr)) minmax(0,1.4fr);gap:12px;align-items:end}
+@media (max-width:520px){.nums{grid-template-columns:repeat(3,minmax(0,1fr))}.spark{grid-column:1/-1}}
+.num small{display:block;font-size:11px;letter-spacing:.08em;text-transform:uppercase;color:var(--muted)}
+.num b{font:500 20px/1.2 var(--mono);font-variant-numeric:tabular-nums}
+.num b.good{color:var(--good)}
+.spark svg{width:100%;height:44px;display:block}
+.foot{display:flex;flex-wrap:wrap;gap:8px 14px;align-items:center;justify-content:space-between;font-size:13px;color:var(--muted);border-top:1px dashed var(--line);padding-top:10px}
+.foot a{color:var(--accent)}
+.actions{display:flex;flex-wrap:wrap;gap:6px;align-items:center}
+.actions input{width:92px;padding:6px 8px;font-size:14px}
+.note{font-size:13px;color:var(--muted);margin:0}
+.empty{border:1px dashed var(--line);border-radius:8px;padding:28px;text-align:center;color:var(--muted)}
+.tag{font:500 10px var(--mono);letter-spacing:.08em;text-transform:uppercase;border:1px solid var(--line);border-radius:3px;padding:1px 5px;margin-left:6px;vertical-align:middle;color:var(--muted)}
+@media (prefers-reduced-motion:no-preference){.card{transition:border-color .2s}}
+</style>
+
+<div class="wrap">
+  <header>
+    <div>
+      <h1>Ticket <span>Watch</span></h1>
+      <p class="sub">Set a target price for a flight or an event. Claude checks the major sellers every 6 hours and pushes an alert to your phone when a price lands at or under your number.</p>
+    </div>
+    <div class="board" aria-label="Summary">
+      <div><b id="sumWatching">0</b><small>Watching</small></div>
+      <div><b id="sumHits">0</b><small>At target</small></div>
+      <div><b id="sumChecked">never</b><small>Last check</small></div>
+    </div>
+  </header>
+
+  <div class="banner" id="banner" hidden></div>
+
+  <div class="layout">
+    <form class="panel" id="addForm" novalidate>
+      <h2>New watch</h2>
+      <div class="seg" role="group" aria-label="Ticket type">
+        <button type="button" id="tabFlight" aria-pressed="true">Flight</button>
+        <button type="button" id="tabEvent" aria-pressed="false">Event</button>
+      </div>
+
+      <div id="flightFields" style="display:grid;gap:12px">
+        <div class="row2">
+          <label>From<input id="fFrom" placeholder="IAH or HOU" autocomplete="off"></label>
+          <label>To<input id="fTo" placeholder="DEN" autocomplete="off"></label>
+        </div>
+        <div class="row2">
+          <label>Depart<input id="fDepart" type="date"></label>
+          <label>Return<input id="fReturn" type="date"></label>
+        </div>
+        <div class="row2">
+          <label>Cabin<select id="fCabin"><option>Economy</option><option>Premium economy</option><option>Business</option><option>First</option></select></label>
+          <label>Travelers<input id="fPax" type="number" min="1" max="9" value="1"></label>
+        </div>
+        <label class="check"><input type="checkbox" id="fNonstop"> Nonstop only</label>
+        <p class="hint">Leave Return empty for one way. Airports or city names both work.</p>
+      </div>
+
+      <div id="eventFields" style="display:none;gap:12px">
+        <label>Event<input id="eName" placeholder="Artist, team matchup, or show" autocomplete="off"></label>
+        <div class="row2">
+          <label>City<input id="eCity" placeholder="Houston" autocomplete="off"></label>
+          <label>Date<input id="eDate" type="date"></label>
+        </div>
+        <div class="row2">
+          <label>Tickets<input id="eQty" type="number" min="1" max="10" value="2"></label>
+          <label>Section<input id="eSection" placeholder="Any" autocomplete="off"></label>
+        </div>
+        <p class="hint">Checks Ticketmaster, StubHub, SeatGeek, Vivid Seats and TickPick.</p>
+      </div>
+
+      <label>Target price per ticket (USD)<input id="target" type="number" min="1" step="1" placeholder="180" inputmode="numeric"></label>
+      <p class="formmsg" id="formMsg" hidden></p>
+      <button class="btn primary" type="submit" id="addBtn">Start watching</button>
+    </form>
+
+    <section class="list" id="list" aria-live="polite">
+      <div class="empty">Loading your watches</div>
+    </section>
+  </div>
+
+  <p class="note">Prices come from public listings found during each check and can change within minutes. Event prices are compared with fees included when the seller shows them. Confirm on the seller's site before you buy.</p>
+</div>
+
+<script>
+(function(){
+  var db=null, col=null, watches=[], kind="flight", confirmDel=null;
+  var $=function(id){return document.getElementById(id)};
+
+  function money(n){ if(n==null||isNaN(n)) return "n/a"; return "$"+Math.round(n).toLocaleString("en-US"); }
+  function fmtDate(s){ if(!s) return ""; var d=new Date(s+"T12:00:00"); if(isNaN(d)) return s; return d.toLocaleDateString("en-US",{month:"short",day:"numeric",year:"numeric"}); }
+  function ago(iso){ if(!iso) return "never"; var t=new Date(iso).getTime(); if(isNaN(t)) return "never"; var m=Math.round((Date.now()-t)/60000);
+    if(m<1) return "just now"; if(m<60) return m+"m ago"; var h=Math.round(m/60); if(h<48) return h+"h ago"; return Math.round(h/24)+"d ago"; }
+  function esc(s){ return String(s==null?"":s).replace(/[&<>"']/g,function(c){return {"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]}); }
+  function safeUrl(u){ return /^https?:\/\//i.test(u||"") ? u : null; }
+
+  function setKind(k){
+    kind=k;
+    $("tabFlight").setAttribute("aria-pressed",k==="flight");
+    $("tabEvent").setAttribute("aria-pressed",k==="event");
+    $("flightFields").style.display=k==="flight"?"grid":"none";
+    $("eventFields").style.display=k==="event"?"grid":"none";
+  }
+  $("tabFlight").onclick=function(){setKind("flight")};
+  $("tabEvent").onclick=function(){setKind("event")};
+
+  function statusOf(w){
+    if(w.active===false) return "paused";
+    if(w.latest && w.latest.price!=null && w.latest.price<=w.targetPrice) return "hit";
+    if(!w.latest) return "pending";
+    return "watching";
+  }
+  var statusLabel={watching:"Watching",hit:"At target",paused:"Paused",pending:"First check pending"};
+
+  function spark(w){
+    var h=(w.history||[]).filter(function(p){return p&&p.price!=null});
+    if(h.length<2) return '<p class="hint">Trend appears after two checks</p>';
+    var vals=h.map(function(p){return p.price}).concat([w.targetPrice]);
+    var lo=Math.min.apply(null,vals), hi=Math.max.apply(null,vals); if(hi===lo){hi+=1;lo-=1}
+    var W=200,H=44,pad=4;
+    function y(v){return pad+(H-2*pad)*(1-(v-lo)/(hi-lo))}
+    function x(i){return pad+(W-2*pad)*i/(h.length-1)}
+    var pts=h.map(function(p,i){return x(i).toFixed(1)+","+y(p.price).toFixed(1)}).join(" ");
+    var ty=y(w.targetPrice).toFixed(1), last=h[h.length-1];
+    return '<svg viewBox="0 0 '+W+' '+H+'" preserveAspectRatio="none" role="img" aria-label="Price trend over '+h.length+' checks">'+
+      '<line x1="0" x2="'+W+'" y1="'+ty+'" y2="'+ty+'" stroke="var(--good)" stroke-dasharray="3 3" stroke-width="1" vector-effect="non-scaling-stroke"/>'+
+      '<polyline points="'+pts+'" fill="none" stroke="var(--accent)" stroke-width="2" vector-effect="non-scaling-stroke" stroke-linejoin="round"/>'+
+      '<circle cx="'+x(h.length-1).toFixed(1)+'" cy="'+y(last.price).toFixed(1)+'" r="3" fill="var(--accent)"/></svg>';
+  }
+
+  function describe(w){
+    if(w.kind==="flight"){
+      var f=w.flight||{};
+      var title=esc((f.origin||"?").toUpperCase())+" &rarr; "+esc((f.destination||"?").toUpperCase());
+      var bits=[fmtDate(f.departDate)+(f.returnDate?" to "+fmtDate(f.returnDate):" one way"), f.cabin||"Economy", (f.passengers||1)+(f.passengers>1?" travelers":" traveler")];
+      if(f.nonstop) bits.push("nonstop");
+      return {title:title,meta:esc(bits.join(" · "))};
+    }
+    var e=w.event||{};
+    var eb=[e.city, e.date?fmtDate(e.date):"any date", (e.quantity||1)+" tickets"];
+    if(e.section) eb.push("section "+e.section);
+    return {title:esc(e.name||"Event"),meta:esc(eb.filter(Boolean).join(" · "))};
+  }
+
+  function render(){
+    var list=$("list");
+    var sorted=watches.slice().sort(function(a,b){
+      var order={hit:0,watching:1,pending:2,paused:3};
+      return (order[statusOf(a)]-order[statusOf(b)]) || String(a.createdAt||"").localeCompare(String(b.createdAt||""));
+    });
+    $("sumWatching").textContent=watches.filter(function(w){return w.active!==false}).length;
+    $("sumHits").textContent=watches.filter(function(w){return statusOf(w)==="hit"}).length;
+    var lastIso=watches.map(function(w){return w.latest&&w.latest.checkedAt}).filter(Boolean).sort().pop();
+    $("sumChecked").textContent=ago(lastIso);
+
+    if(!sorted.length){ list.innerHTML='<div class="empty">No watches yet. Add a flight or event on the left and the next check picks it up.</div>'; return; }
+
+    list.innerHTML=sorted.map(function(w){
+      var st=statusOf(w), d=describe(w), L=w.latest||{};
+      var gap = L.price!=null ? L.price-w.targetPrice : null;
+      var low=(w.history||[]).reduce(function(m,p){return p&&p.price!=null&&(m==null||p.price<m)?p.price:m},null);
+      var url=safeUrl(L.url);
+      var src = L.source ? (url?'<a href="'+esc(url)+'" target="_blank" rel="noopener">'+esc(L.source)+'</a>':esc(L.source)) : "";
+      var delBtn = confirmDel===w.id
+        ? '<button class="btn danger" data-act="del-yes" data-id="'+esc(w.id)+'">Confirm delete</button><button class="btn" data-act="del-no">Keep</button>'
+        : '<button class="btn danger" data-act="del" data-id="'+esc(w.id)+'">Delete</button>';
+      return '<article class="card '+(st==="hit"?"hit":"")+'">'+
+        '<div class="top"><div><div class="kind">'+(w.kind==="flight"?"Flight":"Event")+(w.example?'<span class="tag">Example</span>':'')+'</div>'+
+        '<h3 class="title">'+d.title+'</h3><p class="meta">'+d.meta+'</p></div>'+
+        '<span class="chip '+st+'">'+statusLabel[st]+'</span></div>'+
+        '<div class="nums">'+
+          '<div class="num"><small>Target</small><b>'+money(w.targetPrice)+'</b></div>'+
+          '<div class="num"><small>Now</small><b class="'+(st==="hit"?"good":"")+'">'+money(L.price)+'</b></div>'+
+          '<div class="num"><small>'+(gap==null?"Low seen":(gap<=0?"Under by":"Over by"))+'</small><b class="'+(gap!=null&&gap<=0?"good":"")+'">'+(gap==null?money(low):money(Math.abs(gap)))+'</b></div>'+
+          '<div class="spark">'+spark(w)+'</div>'+
+        '</div>'+
+        (L.note?'<p class="note">'+esc(L.note)+'</p>':'')+
+        '<div class="foot"><span>'+(L.checkedAt?"Checked "+ago(L.checkedAt)+(src?" via "+src:""):"Waiting for the first check")+'</span>'+
+        '<div class="actions">'+
+          '<input type="number" min="1" id="t-'+esc(w.id)+'" aria-label="New target" placeholder="'+Math.round(w.targetPrice)+'">'+
+          '<button class="btn" data-act="target" data-id="'+esc(w.id)+'">Set target</button>'+
+          '<button class="btn" data-act="toggle" data-id="'+esc(w.id)+'">'+(w.active===false?"Resume":"Pause")+'</button>'+
+          delBtn+
+        '</div></div></article>';
+    }).join("");
+  }
+
+  $("list").addEventListener("click",function(ev){
+    var b=ev.target.closest("button[data-act]"); if(!b||!db) return;
+    var id=b.getAttribute("data-id"), act=b.getAttribute("data-act");
+    if(act==="del"){confirmDel=id;render();return}
+    if(act==="del-no"){confirmDel=null;render();return}
+    var ref=col.doc(id); b.disabled=true;
+    var p;
+    if(act==="del-yes"){confirmDel=null;p=ref.delete();}
+    else if(act==="toggle"){var w=watches.find(function(x){return x.id===id});p=ref.update({active:w&&w.active===false});}
+    else if(act==="target"){
+      var v=parseFloat($("t-"+id).value);
+      if(!(v>0)){b.disabled=false;$("t-"+id).focus();return}
+      p=ref.update({targetPrice:v,alertedPrice:null});
+    }
+    if(p) p.catch(function(e){showBanner("That change did not save ("+(e&&e.code||"error")+"). Try again in a moment.")});
+  });
+
+  function showBanner(t){var b=$("banner");b.textContent=t;b.hidden=!t;}
+  function formErr(t){var m=$("formMsg");m.textContent=t;m.hidden=!t;}
+
+  $("addForm").addEventListener("submit",function(ev){
+    ev.preventDefault(); formErr("");
+    if(!db){formErr("Saving is unavailable in this view.");return}
+    var target=parseFloat($("target").value);
+    if(!(target>0)){formErr("Enter a target price above $0.");return}
+    var doc={kind:kind,targetPrice:target,currency:"USD",active:true,createdAt:new Date().toISOString(),latest:null,history:[],alertedPrice:null};
+    if(kind==="flight"){
+      var o=$("fFrom").value.trim(), t=$("fTo").value.trim(), d=$("fDepart").value, r=$("fReturn").value;
+      if(!o||!t){formErr("Enter where you are flying from and to.");return}
+      if(!d){formErr("Pick a departure date.");return}
+      if(r&&r<d){formErr("Return date is before departure.");return}
+      doc.flight={origin:o,destination:t,departDate:d,returnDate:r||null,cabin:$("fCabin").value,passengers:parseInt($("fPax").value,10)||1,nonstop:$("fNonstop").checked};
+    } else {
+      var n=$("eName").value.trim();
+      if(!n){formErr("Enter the event name.");return}
+      doc.event={name:n,city:$("eCity").value.trim(),date:$("eDate").value||null,quantity:parseInt($("eQty").value,10)||1,section:$("eSection").value.trim()||null};
+    }
+    var btn=$("addBtn"); btn.disabled=true;
+    col.add(doc).then(function(){
+      $("addForm").reset(); setKind(kind); btn.disabled=false;
+    }).catch(function(e){
+      btn.disabled=false;
+      formErr(e&&e.code==="quota_exceeded"?"The watchlist is full. Delete an old watch first.":"Could not save that watch. Try again.");
+    });
+  });
+
+  setInterval(render,60000);
+
+  (async function(){
+    if(!window.claude||!window.claude.use){ showBanner("Open this page in Claude to load and save your watches."); $("list").innerHTML='<div class="empty">Your watchlist loads here.</div>'; return; }
+    db=await window.claude.use("db");
+    if(!db){ showBanner("Your watchlist is unavailable in this view."); $("list").innerHTML='<div class="empty">Your watchlist loads here.</div>'; return; }
+    col=db.collection("watches");
+    col.onSnapshot(function(snap){
+      watches=snap.docs.map(function(d){var o=Object.assign({},d.data());o.id=d.id;return o});
+      render();
+    },function(e){ showBanner("Live updates stopped. Reload the page to reconnect."); });
+  })();
+})();
+</script>
