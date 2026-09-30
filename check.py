@@ -250,4 +250,13 @@ def main():
 
 
 if __name__ == "__main__":
+    # `python3 check.py --every 5` keeps checking every 5 minutes until stopped.
+    if len(sys.argv) == 3 and sys.argv[1] == "--every":
+        import time
+        while True:
+            try:
+                main()
+            except Exception as e:  # keep looping through network hiccups
+                print("Check failed:", repr(e))
+            time.sleep(float(sys.argv[2]) * 60)
     sys.exit(main())

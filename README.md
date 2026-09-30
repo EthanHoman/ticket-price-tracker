@@ -11,6 +11,21 @@ The price check runs on **GitHub Actions**, free for this public repo, and uses 
 - `.github/workflows/check-prices.yml` runs the check every 5 minutes. GitHub often starts scheduled runs late, so expect roughly every 5 to 15 minutes. Each run's summary page shows the price from every site, or why a site gave none.
 - `state.json` remembers the last price that triggered an alert, so a watch alerts once per new low. When the price goes back up to the target or higher, the watch resets and alerts again on the next drop.
 
+## Running it on your own computer
+
+A home internet connection is less likely to be blocked than GitHub's servers. With Python 3 installed:
+
+```sh
+git clone https://github.com/EthanHoman/ticket-price-tracker.git
+cd ticket-price-tracker
+pip3 install playwright
+python3 -m playwright install chromium
+export NTFY_TOPIC=your-topic-name
+python3 check.py --every 5
+```
+
+On Windows use `set NTFY_TOPIC=your-topic-name` instead of `export`. It checks every 5 minutes until you close the window or press Ctrl+C, and only while the computer is awake. `python3 check.py` alone runs one check.
+
 ## Phone alerts
 
 When the lowest price is strictly under a watch's target, the check posts to an [ntfy](https://ntfy.sh) topic. Subscribe to the topic in the ntfy app to get it as a phone notification.
