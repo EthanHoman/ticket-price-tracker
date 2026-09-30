@@ -20,9 +20,14 @@ concurrency:
 jobs:
   check:
     runs-on: ubuntu-latest
-    timeout-minutes: 5
+    timeout-minutes: 10
     steps:
       - uses: actions/checkout@v4
+
+      - name: Install headless browser
+        run: |
+          pip install -q playwright
+          python3 -m playwright install --with-deps chromium > /dev/null
 
       - name: Check prices
         env:

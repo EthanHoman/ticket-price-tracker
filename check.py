@@ -49,6 +49,30 @@ def fetch(url):
     return body.decode("utf-8", "replace")
 
 
+_browser = None
+
+
+def fetch_browser(url):
+    """Load a page in headless Chromium, for sellers that only serve prices to
+    real browsers. Returns None if Playwright isn't installed."""
+    global _browser
+    try:
+        from playwright.sync_api import sync_playwright
+    except ImportError:
+        return None
+    if _browser is None:
+        _browser = sync_playwright().start().chromium.launch()
+    page = _browser.new_page()
+    try:
+        resp = page.goto(url, wait_until="domcontentloaded", timeout=45000)
+        page.wait_for_timeout(5000)
+        if resp and resp.status >= 400:
+            raise urllib.error.HTTPError(url, resp.status, "blocked", None, None)
+        return page.content()
+    finally:
+        page.close()
+
+
 def walk(node):
     if isinstance(node, dict):
         yield node
@@ -120,12 +144,21 @@ def check_watch(w):
     for site, url in (w.get("urls") or {}).items():
         if not url:
             continue
-        try:
-            price, detail = price_from_html(fetch(url), w.get("date"))
-        except urllib.error.HTTPError as e:
-            price, detail = None, f"blocked (HTTP {e.code})"
-        except Exception as e:  # network errors, timeouts, bad encodings
-            price, detail = None, f"error: {type(e).__name__}"
+        price, detail = None, "not checked"
+        # Plain request first; sites that block it or hide prices get a real browser.
+        for how, get in (("", fetch), ("browser, ", fetch_browser)):
+            try:
+                html = get(url)
+                if html is None:
+                    break
+                price, detail = price_from_html(html, w.get("date"))
+            except urllib.error.HTTPError as e:
+                price, detail = None, f"blocked (HTTP {e.code})"
+            except Exception as e:  # network errors, timeouts, bad encodings
+                price, detail = None, f"error: {type(e).__name__}"
+            detail = how + detail
+            if price is not None:
+                break
         results.append((site, price, detail, url))
     if w.get("seatgeek_event_id"):
         try:
@@ -217,4 +250,13 @@ def main():
 
 
 if __name__ == "__main__":
+    # `python3 check.py --every 5` keeps checking every 5 minutes until stopped.
+    if len(sys.argv) == 3 and sys.argv[1] == "--every":
+        import time
+        while True:
+            try:
+                main()
+            except Exception as e:  # keep looping through network hiccups
+                print("Check failed:", repr(e))
+            time.sleep(float(sys.argv[2]) * 60)
     sys.exit(main())
