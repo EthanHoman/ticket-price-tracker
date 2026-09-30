@@ -29,7 +29,7 @@ jobs:
           NTFY_TOPIC: ${{ secrets.NTFY_TOPIC }}
           SEATGEEK_CLIENT_ID: ${{ secrets.SEATGEEK_CLIENT_ID }}
           TEST_NOTIFICATION: ${{ inputs.test_notification }}
-        run: python3 check.py
+        run: python3 probe.py
 
       - name: Save alert state
         run: |
