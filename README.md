@@ -21,7 +21,7 @@ Setup:
 
 ## Limits
 
-- Many ticket sites block automated requests, especially StubHub and Ticketmaster. A blocked site shows as `blocked (HTTP 403)` in the run summary, and the check uses whichever sites answered.
+- Many ticket sites block automated requests. When a plain request is blocked or shows no price, the check loads the page in headless Chromium, which gets Vivid Seats' prices. StubHub, Ticketmaster and AXS still block GitHub's servers even in a browser. They show as `blocked (HTTP 403)` in the run summary, and the check uses whichever sites answered.
 - Use the single event page URL for each seller. A page that lists several events is skipped, so a different date's price can't cause a false alert.
 - GitHub turns off scheduled workflows in a public repo after 60 days without commits. Re-enable it from the Actions tab.
 - Prices can change within minutes. Confirm on the seller's site before you buy.
