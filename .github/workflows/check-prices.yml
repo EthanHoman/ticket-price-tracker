@@ -24,15 +24,17 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
+      - name: Install headless browser
+        run: |
+          pip install -q playwright
+          python3 -m playwright install --with-deps chromium > /dev/null
+
       - name: Check prices
         env:
           NTFY_TOPIC: ${{ secrets.NTFY_TOPIC }}
           SEATGEEK_CLIENT_ID: ${{ secrets.SEATGEEK_CLIENT_ID }}
           TEST_NOTIFICATION: ${{ inputs.test_notification }}
-        run: |
-          pip install -q playwright
-          python3 -m playwright install --with-deps chromium > /dev/null
-          python3 probe.py
+        run: python3 check.py
 
       - name: Save alert state
         run: |
